@@ -13,7 +13,6 @@ import {
   MicOff02Icon,
   AiChat02Icon
 } from "hugeicons-react";
-import { Volume2, VolumeX } from "lucide-react";
 import { useVoiceAgent } from "@/hooks/useVoiceAgent";
 import { useCanvasSolver } from "@/hooks/useCanvasSolver";
 import { useBoardSync } from "@/hooks/useBoardSync";
@@ -200,7 +199,7 @@ export function BoardContent({
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 px-4 py-2 rounded-xl shadow-md flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
             <div className={cn(
               "w-2 h-2 rounded-full",
-              voiceAgent.status === "recording" ? "bg-red-500 animate-pulse" : "bg-blue-500 animate-pulse"
+              voiceAgent.status === "recording" ? "bg-blue-500 animate-pulse" : "bg-blue-500 animate-pulse"
             )} />
             <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
               {voiceAgent.statusDetail || voiceAgent.status}
@@ -233,23 +232,13 @@ export function BoardContent({
           <AiChat02Icon size={18} />
         </Button>
 
-        {isVoiceSessionActive && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={voiceAgent.toggleMute}
-            className="h-10 w-10 rounded-xl shadow-md bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800"
-          >
-            {voiceAgent.isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          </Button>
-        )}
         <Button 
           variant={voiceAgent.status === "recording" ? "default" : "outline"}
           onClick={voiceAgent.toggleSession}
           disabled={voiceAgent.status !== "idle" && voiceAgent.status !== "recording" && voiceAgent.status !== "error"}
           className={cn(
             "h-10 w-10 rounded-xl shadow-md border border-neutral-200 dark:border-neutral-800 transition-all flex items-center justify-center",
-            voiceAgent.status === "recording" ? "bg-red-500 text-white hover:bg-red-600 shadow-red-200" : "bg-white dark:bg-neutral-900 text-black dark:text-white hover:bg-neutral-50"
+            voiceAgent.status === "recording" ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200" : "bg-white dark:bg-neutral-900 text-black dark:text-white hover:bg-neutral-50"
           )}
           title={voiceAgent.status === "recording" ? "Stop Recording" : "Voice Command"}
         >
