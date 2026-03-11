@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       ? `${artistPrompt}\n\nUSER INPUT: "${actionPrompt}"`
       : artistPrompt;
 
-    const endpoint = imageUrls.length > 0 ? "fal-ai/flux-2-pro/edit" : "fal-ai/flux-2-pro";
+    const endpoint = "fal-ai/nano-banana-2";
     const input = imageUrls.length > 0
       ? { prompt: fullPrompt, image_urls: imageUrls, output_format: "png" as const }
       : { prompt: fullPrompt, output_format: "png" as const };
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       const result = await fal.subscribe(endpoint, { input });
       const falImageUrl = (result.data as any).images?.[0]?.url;
 
-      if (!falImageUrl) throw new Error("Flux returned no image");
+      if (!falImageUrl) throw new Error("Nano Banana returned no image");
 
       // Fetch and convert to base64 data URL to avoid CORS on the client
       const imgResponse = await fetch(falImageUrl);
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       const base64 = Buffer.from(imgBuffer).toString('base64');
       const imageUrl = `data:image/png;base64,${base64}`;
 
-      solutionLogger.info({ requestId }, 'Solution generated via Flux 2 Pro');
+      solutionLogger.info({ requestId }, 'Solution generated via Nano Banana 2');
 
       return NextResponse.json({ success: true, imageUrl, textContent: textContent || '' });
     } catch (err) {
