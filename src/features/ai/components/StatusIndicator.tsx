@@ -38,7 +38,7 @@ export function StatusIndicator({ status, errorMessage, customMessage }: StatusI
         initial={{ opacity: 0, y: 10, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-        className={`flex items-center gap-2 px-3 py-2 bg-white dark:bg-neutral-900 border rounded-xl shadow-md overflow-hidden relative min-w-[120px] ${
+        className={`flex items-center gap-2 px-3 py-2 bg-white dark:bg-neutral-900 border rounded-xl shadow-md overflow-hidden relative ${
           isError ? "border-red-200 dark:border-red-900" : "border-neutral-200 dark:border-neutral-800"
         }`}
       >
@@ -82,11 +82,13 @@ export function StatusIndicator({ status, errorMessage, customMessage }: StatusI
             </div>
           )}
 
-          <span className={`text-sm font-medium tracking-tight ${
-            isError ? "text-red-600" : "text-neutral-700 dark:text-neutral-300"
-          }`}>
-            {message}
-          </span>
+          {!isGenerating && (
+            <span className={`text-sm font-medium tracking-tight ${
+              isError ? "text-red-600" : "text-neutral-700 dark:text-neutral-300"
+            }`}>
+              {message}
+            </span>
+          )}
         </div>
       </motion.div>
     </AnimatePresence>

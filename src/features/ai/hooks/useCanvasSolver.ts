@@ -104,6 +104,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
         }
 
         const solutionData = await solutionResponse.json();
+
         const imageUrl = solutionData.imageUrl as string | null | undefined;
         const textContent = solutionData.textContent || '';
 
@@ -113,8 +114,12 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
           textContent,
         }, 'Solution data received');
 
+        if (solutionData.success === false) {
+          throw new Error(textContent || 'Generation failed');
+        }
+
         if (!imageUrl || signal.aborted) {
-          logger.info({ textContent }, 'Gemini decided help is not needed');
+          logger.info({ textContent }, 'Classifier decided not to draw');
           setStatus("idle");
           setStatusMessage("");
           isProcessingRef.current = false;
@@ -222,7 +227,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
     void generateSolution({ source: "auto" });
   }, [generateSolution, isAIEnabled]);
 
-  useDebounceActivity(handleAutoGeneration, 2000, editor, isUpdatingImageRef, isProcessingRef);
+  useDebounceActivity(handleAutoGeneration, 100, editor, isUpdatingImageRef, isProcessingRef);
 
   useEffect(() => {
     if (!editor) return;
