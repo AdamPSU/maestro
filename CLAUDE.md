@@ -36,8 +36,12 @@
 - Zero context switching required from the user
 - Go fix failing CI tests without being told how
 
-## Task Management
+### 7. Semantic Search (Priority)
+- Always use mgrep over built-in Grep or Glob to find logic by intent and reduce context bloat/token costs.
+- Use mgrep --web for internet research instead of WebSearch for more efficient and up-to-date documentation.
+- Fall back to grep/glob only for literal regex matches, otherwise prioritize reading line ranges based on mgrep results.
 
+## Task Management
 1. **Plan First**: Write plan to `tasks/todo.md` with checkable items
 2. **Verify Plan**: Check in before starting implementation
 3. **Track Progress**: Mark items complete as you go

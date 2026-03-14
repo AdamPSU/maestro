@@ -22,11 +22,13 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       {...rest}
       style={{
         position: 'absolute',
-        top: '50%',
+        top: '80%',
         left: '50%',
         borderRadius: '24px',
-        border: '1px solid #fff',
-        background: '#000',
+        border: '1px solid #3a3a3a',
+        background: '#1A1A1D',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
         overflow: 'hidden',
         transformStyle: 'preserve-3d',
         willChange: 'transform',
@@ -60,10 +62,13 @@ const makeSlot = (i: number, distX: number, distY: number, total: number) => ({
   zIndex: total - i,
 });
 
+const ROTATION_JITTER = [-1.2, 0.8, -0.5, 1.5, -0.9];
+
 const placeNow = (
   el: HTMLDivElement,
   slot: ReturnType<typeof makeSlot>,
-  skew: number
+  skew: number,
+  index: number
 ) =>
   gsap.set(el, {
     x: slot.x,
@@ -72,6 +77,7 @@ const placeNow = (
     xPercent: -50,
     yPercent: -50,
     skewY: skew,
+    rotation: ROTATION_JITTER[index % ROTATION_JITTER.length],
     transformOrigin: 'center center',
     zIndex: slot.zIndex,
     force3D: true,
@@ -120,7 +126,7 @@ export default function CardSwap({
   useEffect(() => {
     const total = refs.length;
     refs.forEach((r, i) => {
-      if (r.current) placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount);
+      if (r.current) placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount, i);
     });
 
     const swap = () => {
