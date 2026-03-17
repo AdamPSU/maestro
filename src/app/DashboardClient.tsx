@@ -100,8 +100,18 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
         />
       </div>
 
+      {/* Subtle grid overlay */}
+      <div
+        className="absolute inset-0 z-[1] pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px)`,
+          backgroundSize: '90px 90px',
+        }}
+      />
+
       {/* Navbar */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-4 border-b border-white/10">
+      <nav className="relative z-10 flex items-center justify-between px-8 py-4">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 bg-white rounded-md" />
           <span className="text-base font-semibold tracking-tight text-white">Studio</span>
@@ -141,7 +151,7 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
         </div>
 
         {/* Right: ChromaGrid */}
-        <div className="absolute bottom-8 right-8 gap-3 overflow-hidden" style={{ left: '38%' }}>
+        <div className="absolute bottom-4 right-4 gap-3 overflow-hidden" style={{ left: '38%' }}>
           <ChromaGrid
             items={chromaItems}
             radius={280}

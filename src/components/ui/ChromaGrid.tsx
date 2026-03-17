@@ -82,7 +82,7 @@ export default function ChromaGrid({
           className="relative rounded-xl overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
           style={{
             border: `1px solid ${item.borderColor ?? 'rgba(58,58,58,0.5)'}`,
-            background: item.gradient ?? 'rgba(26,26,29,0.6)',
+            background: item.gradient ?? 'rgba(26,26,29,1)',
             aspectRatio: '4/3',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
