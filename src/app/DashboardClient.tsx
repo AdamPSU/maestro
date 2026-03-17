@@ -2,9 +2,8 @@
 
 import { useOptimistic, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import CardSwap, { Card } from "@/components/ui/CardSwap";
+import ChromaGrid, { ChromaItem } from "@/components/ui/ChromaGrid";
 import Dither from "@/components/Dither";
-import Aurora from "@/components/Aurora";
 import { createWhiteboard, deleteWhiteboard, renameWhiteboard } from "./actions";
 import {
   Dialog,
@@ -64,9 +63,25 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
     });
   };
 
+  const PALETTES = [
+    { borderColor: 'rgba(139,92,246,0.5)',  gradient: 'linear-gradient(145deg,rgba(109,40,217,0.45),rgba(5,5,15,0.85))' },
+    { borderColor: 'rgba(236,72,153,0.5)',  gradient: 'linear-gradient(210deg,rgba(190,24,93,0.45),rgba(5,5,15,0.85))' },
+    { borderColor: 'rgba(99,102,241,0.5)',  gradient: 'linear-gradient(165deg,rgba(67,56,202,0.45),rgba(5,5,15,0.85))' },
+    { borderColor: 'rgba(6,182,212,0.5)',   gradient: 'linear-gradient(195deg,rgba(8,145,178,0.45),rgba(5,5,15,0.85))' },
+    { borderColor: 'rgba(167,139,250,0.5)', gradient: 'linear-gradient(225deg,rgba(124,58,237,0.45),rgba(5,5,15,0.85))' },
+    { borderColor: 'rgba(232,121,249,0.5)', gradient: 'linear-gradient(180deg,rgba(168,85,247,0.45),rgba(5,5,15,0.85))' },
+  ];
+
   const cards = optimisticWhiteboards.length > 0
-    ? optimisticWhiteboards.slice(0, 5)
-    : Array.from({ length: 3 }, (_, i) => ({ id: `placeholder-${i}`, title: "Untitled Canvas", created_at: "", updated_at: "", preview: undefined }));
+    ? optimisticWhiteboards.slice(0, 12)
+    : Array.from({ length: 12 }, (_, i) => ({ id: `placeholder-${i}`, title: "Untitled Canvas", created_at: "", updated_at: "", preview: undefined }));
+
+  const chromaItems: ChromaItem[] = cards.map((board, i) => ({
+    image: board.preview ?? '',
+    title: board.title,
+    subtitle: board.updated_at ? formatTime(board.updated_at) : 'New Canvas',
+    ...PALETTES[i % PALETTES.length],
+  }));
 
   return (
     <div className="h-screen overflow-hidden flex flex-col relative">
@@ -99,24 +114,21 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
       </nav>
 
       {/* Hero */}
-      <div className="relative z-10 overflow-hidden flex flex-col flex-1 px-8 md:px-16 pt-16 pb-0">
-        {/* Hero — single-column left stack */}
-        <div className="flex flex-col gap-6 mb-16 max-w-2xl">
-          <span className="text-xs font-semibold tracking-widest uppercase text-white/40">
-            Canvas + AI Studio
-          </span>
-          <h1
-            className="font-black text-white leading-tight tracking-tight"
-            style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
-          >
-            The AI-powered canvas.
-            <br />
-            One infinite cosmos for thoughtful art.
-          </h1>
-          <p className="text-xl text-white leading-relaxed">
-            Sketch, brainstorm, and build — with an AI copilot that understands your canvas.
-            Infinite space, zero limits.
-          </p>
+      <div className="relative z-10 grid flex-1 gap-x-8 px-8 md:px-16 pt-16 pb-0 overflow-hidden"
+           style={{ gridTemplateColumns: '1fr 2fr' }}>
+        {/* Left: hero text */}
+        <div className="flex flex-col justify-between pt-4 pb-8 h-full">
+          <div className="flex flex-col gap-6">
+            <h1
+              className="font-black text-white leading-tight tracking-tight"
+              style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
+            >
+              The AI-powered canvas.
+            </h1>
+            <p className="text-lg text-white/70 leading-relaxed">
+              Sketch, brainstorm, and build with an AI copilot that understands your canvas.
+            </p>
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleCreate}
@@ -128,77 +140,25 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
           </div>
         </div>
 
-        {/* CardSwap — absolutely positioned, right edge clipped by parent overflow-hidden */}
-        <div
-          className="absolute"
-          style={{ right: -70, bottom: -186 }}
-        >
-          <CardSwap
-            width={950}
-            height={620}
-            cardDistance={85}
-            verticalDistance={95}
-            delay={5000}
-            pauseOnHover
-            easing="elastic"
-          >
-            {cards.map((board) => (
-              <Card
-                key={board.id}
-                customClass="group"
-                style={{ cursor: "pointer" }}
-                onClick={() => !board.id.startsWith("placeholder") && router.push(`/board/${board.id}`)}
-              >
-                <div className="absolute inset-0">
-                  <Aurora
-                    colorStops={["#000000", "#2c273f"]}
-                    amplitude={1}
-                    blend={0.5}
-                  />
-                </div>
-                <div className="w-full h-full flex flex-col p-6 text-white hover:scale-[1.02] transition-transform duration-300 relative z-10">
-                  {board.preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={board.preview} alt={board.title} className="w-full h-full object-cover absolute inset-0 rounded-3xl" />
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center opacity-20">
-                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <path d="M3 9h18M9 21V9" />
-                      </svg>
-                    </div>
-                  )}
-                  {/* Top overlay — title, date, actions */}
-                  <div className="absolute top-0 left-0 right-0 p-5 bg-gradient-to-b from-black/70 to-transparent rounded-t-3xl">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold">{board.title}</p>
-                      {!board.id.startsWith("placeholder") && (
-                        <>
-                          <span className="text-white/30 text-xs">•</span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleRename(board); }}
-                            className="text-xs text-neutral-300 hover:text-white transition-colors"
-                          >
-                            Rename
-                          </button>
-                          <span className="text-white/30 text-xs">•</span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDelete(board.id); }}
-                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                    {board.updated_at && (
-                      <p className="text-xs text-neutral-400 mt-0.5">{formatTime(board.updated_at)}</p>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </CardSwap>
+        {/* Right: ChromaGrid */}
+        <div className="flex flex-col justify-end pb-14 overflow-visible gap-3">
+          <ChromaGrid
+            items={chromaItems}
+            radius={280}
+            damping={0.45}
+            onItemClick={(_, i) => {
+              const board = cards[i];
+              if (board && !board.id.startsWith('placeholder')) router.push(`/board/${board.id}`);
+            }}
+            onRename={(i) => {
+              const board = cards[i];
+              if (board && !board.id.startsWith('placeholder')) handleRename(board);
+            }}
+            onDelete={(i) => {
+              const board = cards[i];
+              if (board && !board.id.startsWith('placeholder')) handleDelete(board.id);
+            }}
+          />
         </div>
       </div>
 
