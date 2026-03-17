@@ -114,7 +114,7 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
       </nav>
 
       {/* Hero */}
-      <div className="relative z-10 grid flex-1 gap-x-8 px-8 md:px-16 pt-16 pb-0 overflow-hidden"
+      <div className="relative z-10 grid flex-1 gap-x-16 px-8 md:px-16 pt-16 pb-0 overflow-hidden"
            style={{ gridTemplateColumns: '1fr 2fr' }}>
         {/* Left: hero text */}
         <div className="flex flex-col justify-between pt-4 pb-8 h-full">
@@ -141,7 +141,7 @@ export default function DashboardClient({ initialWhiteboards }: { initialWhitebo
         </div>
 
         {/* Right: ChromaGrid */}
-        <div className="flex flex-col justify-end pb-14 overflow-visible gap-3">
+        <div className="absolute bottom-8 right-8 gap-3 overflow-hidden" style={{ left: '38%' }}>
           <ChromaGrid
             items={chromaItems}
             radius={280}
