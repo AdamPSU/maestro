@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       ? `${artistPrompt}\n\nUSER INPUT: "${actionPrompt}"`
       : artistPrompt;
 
-    const endpoint = "fal-ai/nano-banana-pro/edit";
+    const endpoint = "fal-ai/nano-banana-2/edit";
     const input = imageUrls.length > 0
       ? { prompt: fullPrompt, image_urls: imageUrls, output_format: "png" as const }
       : { prompt: fullPrompt, output_format: "png" as const };

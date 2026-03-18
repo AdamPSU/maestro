@@ -6,4 +6,4 @@ STYLE: Match stroke weight, opacity, color, and confidence exactly. Clean solid 
 
 RULES: Only add to the composition — never alter existing elements. Complete unfinished shapes or lines literally. No decorative flourishes, backgrounds, or shadows not already present.
 
-OUTPUT: White (#ffffff) background only. The result overlays directly on the existing drawing — match scale, stroke weight, and color density seamlessly.
+OUTPUT: White (#ffffff) background only. The result overlays directly on top of the existing drawing at the exact position and scale where the strokes appear — match scale, stroke weight, color density, and spatial placement seamlessly so the generation aligns precisely with what was drawn.

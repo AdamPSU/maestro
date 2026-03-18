@@ -8,7 +8,6 @@ import {
 import { logger } from "@/lib/logger";
 import { useDebounceActivity } from "@/features/board/hooks/useDebounceActivity";
 import { StatusIndicatorState } from "@/features/ai/components/StatusIndicator";
-import { removeWhiteBackground } from "@/utils/image-processing";
 
 export function useCanvasSolver(isVoiceSessionActive: boolean) {
   const editor = useEditor();
@@ -63,9 +62,8 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
         let blob: Blob | null = null;
         if (shapesToCapture.length > 0) {
           const result = await editor.toImage(shapesToCapture, {
-            format: "jpeg",
-            quality: 0.7,
-            scale: 0.7,
+            format: "png",
+            scale: 1,
             bounds: viewportBounds,
             background: true,
             padding: 0,
@@ -81,7 +79,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
         if (signal.aborted) return { success: false, textContent: "" };
 
         const formData = new FormData();
-        if (blob) formData.append("image", blob, "canvas.jpg");
+        if (blob) formData.append("image", blob, "canvas.png");
         if (options?.promptOverride) formData.append("prompt", options.promptOverride);
         if (options?.images && options.images.length > 0) {
           options.images.forEach((file, index) => {
@@ -128,15 +126,13 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
 
         if (signal.aborted) return { success: false, textContent: "" };
 
-        const processedImageUrl = await removeWhiteBackground(imageUrl);
-
         const assetId = AssetRecordType.createId();
         const img = new Image();
 
         await new Promise((resolve, reject) => {
           img.onload = () => resolve(null);
           img.onerror = () => reject(new Error('Failed to load generated image'));
-          img.src = processedImageUrl;
+          img.src = imageUrl;
         });
 
         if (signal.aborted) return { success: false, textContent: "" };
@@ -150,7 +146,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
             typeName: 'asset',
             props: {
               name: 'generated-solution.png',
-              src: processedImageUrl,
+              src: imageUrl,
               w: img.width,
               h: img.height,
               mimeType: 'image/png',
