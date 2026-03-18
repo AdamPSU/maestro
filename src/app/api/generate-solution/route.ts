@@ -11,11 +11,22 @@ const ai = new GoogleGenAI({
 
 fal.config({ credentials: process.env.FAL_API_KEY });
 
+const ML_SERVICE_URL = 'http://localhost:8001';
+
+async function cropImageWithDino(imageFile: File, prompt: string | null): Promise<File> {
+  const fd = new FormData();
+  fd.append('image', imageFile, 'canvas.png');
+  if (prompt) fd.append('prompt', prompt);
+  const res = await fetch(`${ML_SERVICE_URL}/crop`, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error(`ML service ${res.status}`);
+  return new File([await res.arrayBuffer()], 'canvas_cropped.png', { type: 'image/png' });
+}
+
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();
   try {
     const formData = await req.formData();
-    const imageFile = formData.get('image') as File | null;
+    let imageFile = formData.get('image') as File | null;
     const prompt = formData.get('prompt') as string | null;
     const source = formData.get('source') as string | null;
 
@@ -38,6 +49,13 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       base64Data = buffer.toString('base64');
       mimeType = imageFile.type || 'image/jpeg';
+    }
+
+    // Crop to detected object region
+    if (imageFile) {
+      imageFile = await cropImageWithDino(imageFile, prompt);
+      base64Data = Buffer.from(await imageFile.arrayBuffer()).toString('base64');
+      mimeType = 'image/png';
     }
 
     let textContent = "";
