@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { fal } from '@fal-ai/client';
 import { solutionLogger } from '@/lib/logger';
 import fs from 'fs';
 import path from 'path';
@@ -8,8 +7,6 @@ import path from 'path';
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_AI_API_KEY,
 });
-
-fal.config({ credentials: process.env.FAL_API_KEY });
 
 const ML_SERVICE_URL = 'http://localhost:8001';
 
@@ -106,55 +103,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // --- STAGE 2: IMAGE GENERATION (Flux 2 Pro via fal.ai) ---
-    const imageUrls: string[] = [];
-
-    if (imageFile && base64Data) {
-      const t1 = Date.now();
-      const buffer = Buffer.from(base64Data, 'base64');
-      const blob = new Blob([buffer], { type: mimeType || 'image/jpeg' });
-      const url = await fal.storage.upload(blob);
-      solutionLogger.info({ requestId, ms: Date.now() - t1 }, 'fal upload');
-      imageUrls.push(url);
-    }
-
-    for (const ref of referenceImages) {
-      const buffer = Buffer.from(ref.data, 'base64');
-      const blob = new Blob([buffer], { type: ref.mimeType });
-      const url = await fal.storage.upload(blob);
-      imageUrls.push(url);
-    }
-
+    // --- STAGE 2: IMAGE GENERATION (Gemini nano-banana-2) ---
     const promptFile = actionPrompt ? 'positive_prompt.txt' : 'artist.txt';
     const artistPrompt = fs.readFileSync(path.join(process.cwd(), 'src', 'features', 'ai', 'prompts', promptFile), 'utf8');
     const negativePrompt = fs.readFileSync(path.join(process.cwd(), 'src', 'features', 'ai', 'prompts', 'negative_prompt.txt'), 'utf8');
     const fullPrompt = actionPrompt
-      ? `${artistPrompt}\n\nUSER INPUT: "${actionPrompt}"`
+      ? `${artistPrompt}\n\nUSER INPUT: "${actionPrompt}"\n\nAVOID: ${negativePrompt.trim()}`
       : artistPrompt;
 
-    const endpoint = "fal-ai/nano-banana-2/edit";
-    const baseInput = {
-      prompt: fullPrompt,
-      negative_prompt: negativePrompt.trim(),
-      output_format: "png" as const,
-      guidance_scale: actionPrompt ? 6 : 3,
-    };
-    const input = imageUrls.length > 0
-      ? { ...baseInput, image_urls: imageUrls }
-      : baseInput;
+    const parts: any[] = [{ text: fullPrompt }];
+    if (base64Data && mimeType) parts.push({ inlineData: { data: base64Data, mimeType } });
+    referenceImages.forEach(img => parts.push({ inlineData: img }));
 
     try {
       const t2 = Date.now();
-      const result = await fal.subscribe(endpoint, { input });
-      solutionLogger.info({ requestId, ms: Date.now() - t2 }, 'fal generation');
+      const result = await ai.models.generateContent({
+        model: "gemini-3.1-flash-image-preview",
+        contents: [{ role: "user", parts }],
+        config: { responseModalities: ["IMAGE"] },
+      });
+      solutionLogger.info({ requestId, ms: Date.now() - t2 }, 'gemini generation');
 
-      const falImageUrl = (result.data as any).images?.[0]?.url;
+      const imagePart = result.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
+      if (!imagePart?.inlineData) throw new Error("Gemini returned no image");
 
-      if (!falImageUrl) throw new Error("Nano Banana returned no image");
-
-      const imgResponse = await fetch(falImageUrl);
-      const imgBuffer = await imgResponse.arrayBuffer();
-      const base64 = Buffer.from(imgBuffer).toString('base64');
+      const base64 = imagePart.inlineData.data;
       const imageUrl = `data:image/png;base64,${base64}`;
 
       solutionLogger.info({ requestId }, 'Solution generated');
