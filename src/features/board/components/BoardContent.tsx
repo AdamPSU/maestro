@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { TLShapeId, useEditor } from "tldraw";
 import { Button } from "@/components/ui/button";
 import {
   Tick01Icon,
   Cancel01Icon,
   ArrowLeft01Icon,
+  ArrowRight01Icon,
   SparklesIcon,
   Mic02Icon,
   MicOff02Icon,
@@ -75,7 +75,6 @@ export function BoardContent({
   isChatOpen: boolean;
   setIsChatOpen: (open: boolean) => void;
 }) {
-  const router = useRouter();
   const [isVoiceSessionActive, setIsVoiceSessionActive] = useState(false);
 
   const editor = useEditor();
@@ -134,8 +133,8 @@ export function BoardContent({
             gap: '12px',
           }}
         >
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft01Icon size={20} strokeWidth={2} />
+          <Button variant="ghost" size="icon" onClick={() => setIsChatOpen(!isChatOpen)}>
+            {isChatOpen ? <ArrowLeft01Icon size={20} strokeWidth={2} /> : <ArrowRight01Icon size={20} strokeWidth={2} />}
           </Button>
 
           <Button
@@ -148,7 +147,7 @@ export function BoardContent({
           >
             <SparklesIcon size={16} fill={isAIEnabled ? "currentColor" : "none"} />
             <span>
-              {isAIEnabled ? "AI Active" : "Initialize AI"}
+              {isAIEnabled ? "AI Enabled" : "AI Disabled"}
             </span>
           </Button>
         </div>
@@ -189,8 +188,7 @@ export function BoardContent({
         style={{
           position: 'absolute',
           bottom: '12px',
-          left: '50%',
-          transform: 'translateX(-280px) translateX(-50%)',
+          left: 'calc(50% - 236px)',
           zIndex: 1000,
           display: 'flex',
           gap: '8px',
@@ -232,7 +230,6 @@ export function BoardContent({
 
       <AIChatSidebar
         isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
         status={status}
         lassoImage={lassoState?.image ?? null}
         onSubmit={async (prompt, images) => {

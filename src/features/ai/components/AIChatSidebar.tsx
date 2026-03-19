@@ -16,13 +16,12 @@ interface Message {
 
 interface AIChatSidebarProps {
   isOpen: boolean;
-  onClose: () => void;
   onSubmit: (prompt: string, images?: File[]) => Promise<{ success: boolean; textContent: string }>;
   status: "idle" | "generating" | "success" | "error";
   lassoImage?: File | null;
 }
 
-export function AIChatSidebar({ isOpen, onClose, onSubmit, status, lassoImage }: AIChatSidebarProps) {
+export function AIChatSidebar({ isOpen, onSubmit, status, lassoImage }: AIChatSidebarProps) {
   const [input, setInput] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -106,17 +105,11 @@ export function AIChatSidebar({ isOpen, onClose, onSubmit, status, lassoImage }:
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="fixed top-0 left-0 h-full w-[350px] bg-white dark:bg-neutral-950 border-r border-neutral-200 dark:border-neutral-800 z-[3000] shadow-2xl flex flex-col font-code"
         >
-          <div className="p-5 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-white dark:bg-black">
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 bg-neutral-100 dark:bg-neutral-900 rounded-none text-neutral-600 dark:text-neutral-400 rotate-45">
-                <Sparkles size={16} className="-rotate-45" />
-              </div>
-              <h2 className="font-display font-bold text-sm tracking-tight uppercase">AI Terminal</h2>
+          <div className="p-5 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-black">
+            <div className="p-1.5 bg-neutral-100 dark:bg-neutral-900 rounded-none text-neutral-600 dark:text-neutral-400 rotate-45">
+              <Sparkles size={16} className="-rotate-45" />
             </div>
-
-            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-none hover:bg-neutral-100 dark:hover:bg-neutral-900">
-              <X size={16} />
-            </Button>
+            <h2 className="font-display font-bold text-sm tracking-tight uppercase">AI Terminal</h2>
           </div>
 
           <div
