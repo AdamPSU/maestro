@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_AI_API_KEY,
 });
 
-const ML_SERVICE_URL = 'http://localhost:8001';
+const ML_SERVICE_URL = process.env.DINO_SERVICE_URL ?? 'http://localhost:8001';
 
 async function cropImageWithDino(
   imageFile: File, prompt: string | null
