@@ -13,13 +13,17 @@ fal.config({ credentials: process.env.FAL_API_KEY });
 
 const ML_SERVICE_URL = 'http://localhost:8001';
 
-async function cropImageWithDino(imageFile: File, prompt: string | null): Promise<File> {
+async function cropImageWithDino(
+  imageFile: File, prompt: string | null
+): Promise<{ file: File; crop: [number, number, number, number] }> {
   const fd = new FormData();
   fd.append('image', imageFile, 'canvas.png');
   if (prompt) fd.append('prompt', prompt);
   const res = await fetch(`${ML_SERVICE_URL}/crop`, { method: 'POST', body: fd });
   if (!res.ok) throw new Error(`ML service ${res.status}`);
-  return new File([await res.arrayBuffer()], 'canvas_cropped.png', { type: 'image/png' });
+  const { image, crop } = await res.json();
+  const buffer = Buffer.from(image, 'base64');
+  return { file: new File([buffer], 'canvas_cropped.png', { type: 'image/png' }), crop };
 }
 
 export async function POST(req: NextRequest) {
@@ -52,8 +56,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Crop to detected object region
+    let crop: [number, number, number, number] | null = null;
     if (imageFile) {
-      imageFile = await cropImageWithDino(imageFile, prompt);
+      const { file: croppedFile, crop: detectedCrop } = await cropImageWithDino(imageFile, prompt);
+      imageFile = croppedFile;
+      crop = detectedCrop;
       base64Data = Buffer.from(await imageFile.arrayBuffer()).toString('base64');
       mimeType = 'image/png';
     }
@@ -119,7 +126,7 @@ export async function POST(req: NextRequest) {
       ? `${artistPrompt}\n\nUSER INPUT: "${actionPrompt}"`
       : artistPrompt;
 
-    const endpoint = "fal-ai/nano-banana-2/edit";
+    const endpoint = "fal-ai/flux-2/klein/9b/base/edit";
     const input = imageUrls.length > 0
       ? { prompt: fullPrompt, image_urls: imageUrls, output_format: "png" as const }
       : { prompt: fullPrompt, output_format: "png" as const };
@@ -138,7 +145,7 @@ export async function POST(req: NextRequest) {
 
       solutionLogger.info({ requestId }, 'Solution generated');
 
-      return NextResponse.json({ success: true, imageUrl, textContent: textContent || '' });
+      return NextResponse.json({ success: true, imageUrl, textContent: textContent || '', crop });
     } catch (err) {
       solutionLogger.error({ requestId, err }, 'Artist stage error');
       return NextResponse.json({

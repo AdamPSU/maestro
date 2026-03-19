@@ -64,6 +64,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
           const result = await editor.toImage(shapesToCapture, {
             format: "png",
             scale: 1,
+            pixelRatio: 1,
             bounds: viewportBounds,
             background: true,
             padding: 0,
@@ -157,24 +158,18 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
         ]);
 
         const shapeId = createShapeId();
-        const scale = Math.min(
-          viewportBounds.width / img.width,
-          viewportBounds.height / img.height
-        );
-        const shapeWidth = img.width * scale;
-        const shapeHeight = img.height * scale;
+        const crop = solutionData.crop as [number, number, number, number] | null;
+        const x = viewportBounds.x + (crop ? crop[0] : 0);
+        const y = viewportBounds.y + (crop ? crop[1] : 0);
+        const w = crop ? crop[2] - crop[0] : img.width;
+        const h = crop ? crop[3] - crop[1] : img.height;
 
         editor.createShape({
           id: shapeId,
           type: "image",
-          x: viewportBounds.x + (viewportBounds.width - shapeWidth) / 2,
-          y: viewportBounds.y + (viewportBounds.height - shapeHeight) / 2,
+          x, y,
           isLocked: true,
-          props: {
-            w: shapeWidth,
-            h: shapeHeight,
-            assetId: assetId,
-          },
+          props: { w, h, assetId },
           meta: {},
         });
 

@@ -3,9 +3,11 @@ from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 
+import base64
+
 import torch
 from fastapi import FastAPI, File, Form, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from PIL import Image
 from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
 
@@ -63,7 +65,10 @@ async def crop(image: UploadFile = File(...), prompt: str = Form(DEFAULT_QUERY))
     if len(results["scores"]) == 0:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         (OUTPUT_DIR / f"{ts}_no_detection.png").write_bytes(raw)
-        return Response(content=raw, media_type="image/png")
+        return JSONResponse({
+            "image": base64.b64encode(raw).decode(),
+            "crop": [0, 0, pil_img.width, pil_img.height],
+        })
 
     best_idx = results["scores"].argmax().item()
     box = results["boxes"][best_idx].cpu().tolist()
@@ -77,4 +82,7 @@ async def crop(image: UploadFile = File(...), prompt: str = Form(DEFAULT_QUERY))
     ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     (OUTPUT_DIR / f"{ts}.png").write_bytes(png_bytes)
 
-    return Response(content=png_bytes, media_type="image/png")
+    return JSONResponse({
+        "image": base64.b64encode(png_bytes).decode(),
+        "crop": [x0, y0, x1, y1],
+    })

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "computedHash": "796a0735b3c6d279a1b797817d1a5b4d0dcf3a19ee5124011d8b7bcc1bcf22ee"
+    }
+  }
+}
