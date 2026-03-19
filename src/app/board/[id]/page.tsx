@@ -58,7 +58,7 @@ const hugeIconsOverrides: TLUiOverrides = {
   },
 };
 
-const VISIBLE_TOOLS = ['hand', 'draw', 'eraser', 'text', 'asset', 'lasso'];
+const VISIBLE_TOOLS = ['hand', 'draw', 'eraser', 'text', 'lasso', 'asset'];
 
 function CustomToolbar() {
   const tools = useTools();
