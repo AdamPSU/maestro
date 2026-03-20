@@ -55,6 +55,7 @@ Built for the **NittanyAI Challenge**.
 
 ## Architecture & Data Flow
 
+<p align="center"><img src="media/example.gif" width="100%" /></p>
 <p align="center"><img src="media/architecture.png" width="100%" /></p>
 
 ---
