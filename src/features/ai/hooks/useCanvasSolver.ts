@@ -12,7 +12,7 @@ import { StatusIndicatorState } from "@/features/ai/components/StatusIndicator";
 import { registerLassoCallback, unregisterLassoCallback } from "@/features/ai/tools/LassoTool";
 import { CANVAS_MARGIN_RATIO } from "@/lib/constants";
 
-export function useCanvasSolver(isVoiceSessionActive: boolean) {
+export function useCanvasSolver(isVoiceSessionActive: boolean, activeLayerId: string) {
   const editor = useEditor();
 
   // — State —
@@ -231,7 +231,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
           x, y,
           isLocked: true,
           props: { w, h, assetId },
-          meta: {},
+          meta: { layerId: activeLayerId, _aiPending: true },
         });
 
         setPendingImageIds((prev) => [...prev, shapeId]);
@@ -269,7 +269,7 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
         abortControllerRef.current = null;
       }
     },
-    [editor, pendingImageIds, isVoiceSessionActive, getStatusMessage, isAIEnabled],
+    [editor, pendingImageIds, isVoiceSessionActive, getStatusMessage, isAIEnabled, activeLayerId],
   );
 
   // — Auto Generation —
@@ -311,7 +311,9 @@ export function useCanvasSolver(isVoiceSessionActive: boolean) {
       if (!editor) return;
       isUpdatingImageRef.current = true;
       const lassoShapeId = lassoStateRef.current?.shapeId;
-      editor.updateShape({ id: shapeId, type: "image", isLocked: false });
+      const shape = editor.getShape(shapeId);
+      const { _aiPending: _, ...cleanMeta } = (shape?.meta ?? {}) as any;
+      editor.updateShape({ id: shapeId, type: "image", isLocked: false, meta: cleanMeta });
       if (lassoShapeId) editor.deleteShape(lassoShapeId);
       setPendingImageIds((prev) => prev.filter((id) => id !== shapeId));
       setTimeout(() => { isUpdatingImageRef.current = false; }, 100);

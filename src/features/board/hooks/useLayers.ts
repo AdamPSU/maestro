@@ -97,7 +97,15 @@ export function useLayers(editor: Editor) {
     const shapeIds = [...editor.getCurrentPageShapeIds()].filter(id => {
       return (editor.getShape(id)?.meta as any)?.layerId === layerId;
     });
-    editor.deleteShapes(shapeIds);
+    editor.run(() => {
+      for (const shapeId of shapeIds) {
+        const shape = editor.getShape(shapeId);
+        if (shape?.isLocked && (shape.meta as any)?._aiPending) {
+          editor.updateShape({ id: shapeId, type: shape.type, isLocked: false });
+        }
+      }
+      editor.deleteShapes(shapeIds);
+    });
     const next = current.filter(l => l.id !== layerId).map((l, i) => ({ ...l, order: i }));
     writeLayers(editor, next);
     setLayersState(next);
@@ -129,10 +137,10 @@ export function useLayers(editor: Editor) {
         if (!shape) continue;
         if (!nowVisible) {
           const origOpacity = shape.opacity ?? 1;
-          editor.updateShape({ id: shapeId, type: shape.type, opacity: 0, isLocked: true, meta: { ...shape.meta, _origOpacity: origOpacity } });
+          editor.updateShape({ id: shapeId, type: shape.type, opacity: 0, isLocked: true, meta: { ...shape.meta, _origOpacity: origOpacity, _origLocked: shape.isLocked } });
         } else {
-          const { _origOpacity, ...restMeta } = shape.meta as any;
-          editor.updateShape({ id: shapeId, type: shape.type, opacity: _origOpacity ?? 1, isLocked: false, meta: restMeta });
+          const { _origOpacity, _origLocked, ...restMeta } = shape.meta as any;
+          editor.updateShape({ id: shapeId, type: shape.type, opacity: _origOpacity ?? 1, isLocked: _origLocked ?? false, meta: restMeta });
         }
       }
     });

@@ -76,6 +76,8 @@ export function BoardContent({ id }: { id: string }) {
 
   const editor = useEditor();
 
+  const { layers, activeLayerId, setActiveLayerId, addLayer, deleteLayer, renameLayer, toggleVisibility, toggleLock, reorderLayers } = useLayers(editor);
+
   const {
     pendingImageIds,
     status,
@@ -90,7 +92,7 @@ export function BoardContent({ id }: { id: string }) {
     clearLassoShape,
     isUpdatingImageRef,
     lassoState,
-  } = useCanvasSolver(isVoiceSessionActive);
+  } = useCanvasSolver(isVoiceSessionActive, activeLayerId);
 
   const voiceAgent = useVoiceAgent({
     onSessionChange: setIsVoiceSessionActive,
@@ -104,7 +106,6 @@ export function BoardContent({ id }: { id: string }) {
   });
 
   useBoardSync(id, isUpdatingImageRef);
-  const { layers, activeLayerId, setActiveLayerId, addLayer, deleteLayer, renameLayer, toggleVisibility, toggleLock, reorderLayers } = useLayers(editor);
 
   // Cancel any ongoing AI generation when the chat sidebar is opened
   useEffect(() => {
