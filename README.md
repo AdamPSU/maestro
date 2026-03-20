@@ -55,22 +55,7 @@ Built for the **NittanyAI Challenge**.
 
 ## Architecture & Data Flow
 
-```
-Sketch / Voice / Chat
-      ↓
-useCanvasSolver — captures canvas snapshot
-      ↓
-POST /api/generate-solution
-      ↓
-[Optional] ml_service /crop  ←  Grounding DINO (CUDA)
-      ↓
-Gemini intent classifier  →  Gemini image generation
-      ↓
-Pending image shown on canvas
-      ↓
-Accept ✓  →  shape committed + auto-saved to Supabase
-Reject ✗  →  shape discarded
-```
+<p align="center"><img src="media/architecture.png" width="100%" /></p>
 
 ---
 

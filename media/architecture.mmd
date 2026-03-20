@@ -1,0 +1,75 @@
+graph LR
+    subgraph inputs["User Inputs"]
+        A["✏️ Auto-draw\n(inactivity)"]
+        B["🔲 Lasso\nSelection"]
+        C["🎤 Voice"]
+        D["💬 Chat"]
+    end
+
+    subgraph frontend["Frontend  •  Next.js / tldraw"]
+        E["useCanvasSolver\ncaptures canvas snapshot"]
+        F["useVoiceAgent\nWavRecorder"]
+    end
+
+    subgraph api["API  •  /api"]
+        G["POST /generate-solution"]
+        H["POST /voice/transcribe"]
+    end
+
+    subgraph ml["ML Service  •  localhost:8001"]
+        I["Grounding DINO\n/crop  •  CUDA"]
+    end
+
+    subgraph external["External Services"]
+        J["Gemini Classifier\ngemini-3-flash-preview"]
+        K["nano banana 2\ngemini-3.1-flash-image-preview"]
+        L["OpenAI Whisper"]
+    end
+
+    subgraph canvas["Canvas Result"]
+        M["⏳ Pending Overlay\nlocked shape"]
+        N["✅ Accept\nunlock + commit"]
+        O["❌ Reject\ndiscard"]
+    end
+
+    P[("💾 Supabase\n2s debounce")]
+
+    A --> E
+    B --> E
+    C --> F
+    D --> E
+
+    F --> H
+    H --> L
+    L --> F
+    F --> E
+
+    E --> G
+    G -->|"lasso / no skipCrop"| I
+    I -->|"cropped image + coords"| G
+    G --> J
+    J -->|"draw intent"| K
+    J -->|"text response"| E
+    K -->|"base64 PNG"| G
+    G -->|"imageUrl + crop"| E
+
+    E --> M
+    M --> N
+    M --> O
+    N --> P
+
+    classDef input fill:#90EE90,stroke:#333,stroke-width:1px,color:darkgreen
+    classDef hook fill:#87CEEB,stroke:#333,stroke-width:1px,color:darkblue
+    classDef api fill:#FFD700,stroke:#333,stroke-width:1px,color:#333
+    classDef ml fill:#E6E6FA,stroke:#333,stroke-width:1px,color:darkblue
+    classDef ext fill:#FFB6C1,stroke:#DC143C,stroke-width:1px,color:#333
+    classDef result fill:#90EE90,stroke:#333,stroke-width:1px,color:darkgreen
+    classDef db fill:#FFA07A,stroke:#333,stroke-width:1px,color:#333
+
+    class A,B,C,D input
+    class E,F hook
+    class G,H api
+    class I ml
+    class J,K,L ext
+    class M,N,O result
+    class P db
